@@ -1903,6 +1903,42 @@ function prosesPesanTeks($message)
                     sendApiMsg($chatid, $text, false);
                     break;
 
+                case preg_match("/\/regotp (.*)/", $pesan, $hasil):
+                    sendApiAction($chatid);
+
+                    $pesan      = explode(" ", $message['text']);
+                    $email      = str_replace("#", "", trim($pesan[1]));
+                    $type       = str_replace("#", "", trim($pesan[2]));
+                    $user_id    = 0;
+
+                    $cekUser    = mysqli_query($koneksi, "SELECT * FROM tb_users WHERE email = '$email'");
+                    if (mysqli_num_rows($cekUser) > 0) {
+                        while ($user = mysqli_fetch_array($cekUser)) {
+                            $user_id = $user['users_id'];
+                        }
+
+                        $cekOTP     = mysqli_query($koneksi, "SELECT * FROM tb_token WHERE users_id = '$user_id' AND `type` = '$type'");
+                        if (mysqli_num_rows($cekOTP) > 0) {
+                            $text   = "Email : $email\n";
+                            $text   .= "Tipe : $type\n";
+                            $text   .= "Email dan Tipe tersebut sudah Registrasi OTP.";
+                        } else {
+                            $insertToken = mysqli_query($koneksi, "INSERT INTO tb_token (users_id, telegram_id, type, token, time) VALUES ('$user_id', '$fromid', '$type', NULL, NULL)");
+                            if ($insertToken) {
+                                $text  = "Selamat! Registrasi OTP berhasil.";
+                            } else {
+                                $text  = "Maaf data gagal disimpan, silahkan coba beberapa saat lagi..";
+                                $text .= "Error : " . mysqli_error($koneksi) . " ";
+                            }
+                        }
+                    } else {
+                        $text   = "Email $email belum terdaftar\n";
+                        $text   .= "Silahkan konfirmasi ke Admin atau Team Leader Anda.";
+                    }
+
+                    sendApiMsg($chatid, $text, false);
+                    break;
+
                 default:
                     $cekt       = mysqli_query($koneksi, "SELECT t_telegram_id FROM tb_teknisi WHERE t_telegram_id = '$fromid'");
                     $ceknonik   = mysqli_query($koneksi, "SELECT t_telegram_id FROM tb_teknisi WHERE t_telegram_id = '$fromid' AND nik IS NULL");

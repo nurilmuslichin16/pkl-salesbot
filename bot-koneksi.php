@@ -1,6 +1,6 @@
 <?php
 
-$koneksi = mysqli_connect("127.0.0.1:3306", "jarvisakses", "Jarvis135!", "db_pkl_sales");
+$koneksi = mysqli_connect("127.0.0.1", "root", "", "db_pkl_sales");
 
 // Check connection
 if (mysqli_connect_errno()) {
